@@ -17,5 +17,6 @@ urlpatterns = [
     #         to get the function
     # Param3: name is used for the reverse lookup, so, reverse('user:create')
     #         will now point to this url
-    path('create/',  views.CreateUserView.as_view(), name='create')
+    path('create/',  views.CreateUserView.as_view(), name='create'),
+    path('token/', views.CreateTokenView.as_view(), name='token'),
 ]
