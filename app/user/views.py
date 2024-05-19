@@ -2,7 +2,7 @@
 Views for the user API
 """
 
-from rest_framework import generics
+from rest_framework import generics, authentication, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
 
@@ -21,7 +21,37 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
+# ObtainAuthToken also only supports HTTP.POST request
+# This works only when the user is authenticated
 class CreateTokenView(ObtainAuthToken):
     """Create auth token for user"""
     serializer_class = AuthTokenSerialzer
     renderer_class = api_settings.DEFAULT_RENDERER_CLASSES
+
+
+# generics.RetrieveUpdateAPIView is used for updating(HTTP.PUT/HTTP.PATCH)
+# and retrieving(HTTP.GET) data from db.
+class ManageUserView(generics.RetrieveUpdateAPIView):
+    """Manage Authenticate User"""
+    serializer_class = UserSerializer
+    # Authentication in django rest framework is split into two
+    # parts.
+    #
+    # 1. Authentication: How to know the user is user they say they are,
+    # for this we have authentication classes where we are using
+    # (token authentication)
+    #
+    # 2. Permission classes: We know from authentication who is the user,
+    # permission classes tells what they are allowed to do. In this case
+    # we are saying they MUST BE AUTHENTICATED to use this API other than
+    # that there is no more requirements to access this API
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    # get_object is the one that is the response for HTTP GET request
+    # we overriding the behaviour and retrieving the user that is attached
+    # to this request. The user that has been authentication is always
+    # attached to the request made by it
+    def get_object(self):
+        """Retrieve and return the authenticate user"""
+        return self.request.user
