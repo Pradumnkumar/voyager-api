@@ -46,5 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # USERNAME_FIELD is a class attribute used to specify field
     # that will be used as  unique identifier for the user mode
-    objects = UserManager()
     USERNAME_FIELD = 'email'
+    # This assigns the UserManager to User class. Custon methods
+    # created in UserManager will be used to create objects
+    objects = UserManager()
