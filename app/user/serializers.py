@@ -10,6 +10,9 @@ from django.utils.translation import gettext as _
 
 from rest_framework import serializers
 
+from core.models import User
+import user.utils as utils
+
 """
 serializers are class that converts objects to and from
 python objects. It takes in json input that is posted
@@ -39,7 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
         # We dont want to put isStaff or isSuperUser here
         # as we dont want the person requesting this have
         # the ability to change it
-        fields = ['email', 'password', 'name']
+        fields = ['email', 'password', 'name', 'phone']
         # Extra conditions we want to set on fields, e.g.
         # when we specity write_only it means the user can
         # set the value and save but the API response will
@@ -53,7 +56,13 @@ class UserSerializer(serializers.ModelSerializer):
     # already validate_data by the serializer
     def create(self, validated_data):
         """Create and return a user with encrypted password"""
-        return get_user_model().objects.create_user(**validated_data)
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password'],
+            is_active=False  # Deactivate user until OTP is verified
+        )
+        utils.generate_otp(user)
+        return user
 
     # Override update method in the serializer
     # param2: instance, is the current instance that is being updated
@@ -98,3 +107,9 @@ class AuthTokenSerialzer(serializers.Serializer):
             raise serializers.ValidationError(msg, code=' authorization')
         attrs['user'] = user
         return attrs
+
+
+class OTPTokenSerializer(serializers.Serializer):
+    """Serializer for OTPToken"""
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=6)

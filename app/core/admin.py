@@ -16,7 +16,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (
             None,
-            {'fields': ('email', 'password', )},
+            {'fields': ('email', 'password', 'phone')},
         ),
         (
             _('Permissions'),
@@ -36,6 +36,7 @@ class UserAdmin(BaseUserAdmin):
                 'password1',
                 'password2',
                 'name',
+                'phone',
                 'is_active',
                 'is_staff',
                 'is_superuser',

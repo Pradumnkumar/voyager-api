@@ -2,13 +2,17 @@
 Views for the user API
 """
 
-from rest_framework import generics, authentication, permissions
+from rest_framework import generics, authentication, permissions, status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
+from rest_framework.response import Response
 
+import user.utils as utils
+from core.models import User
 from user.serializers import (
     UserSerializer,
     AuthTokenSerialzer,
+    OTPTokenSerializer,
 )
 
 
@@ -55,3 +59,24 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         """Retrieve and return the authenticate user"""
         return self.request.user
+
+
+class OTPTokenView(generics.CreateAPIView):
+    """Create OTP Associated with USER"""
+    serializer_class = OTPTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            otp = serializer.validated_data['otp']
+            user = User.objects.filter(email=email).first()
+
+            if user and utils.validate_otp(user, otp):
+                user.is_active = True
+                user.save()
+                return Response({'detail': 'OTP verified, user activated.'},
+                                status=status.HTTP_200_OK)
+            return Response({'detail': 'Invalid OTP.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

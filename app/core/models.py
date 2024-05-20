@@ -3,11 +3,13 @@ Database Models.
 """
 
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
 )
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -41,6 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     """User in the system"""
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=13, default='+91')
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -50,3 +53,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     # This assigns the UserManager to User class. Custon methods
     # created in UserManager will be used to create objects
     objects = UserManager()
+
+
+class OTPToken(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE, related_name='otp')
+    otp_code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return self.user.email
+
+    def is_valid(self):
+        return self.expires_at and timezone.now() < self.expires_at
