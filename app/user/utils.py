@@ -12,9 +12,14 @@ def generate_otp(user):
     otp_code = secrets.token_hex(3)  # Generate a 6-character OTP
     # OTP expires in 10 minutes
     expires_at = timezone.now() + timedelta(minutes=10)
-    otp = OTPToken.objects.create(user=user,
-                                  otp_code=otp_code, expires_at=expires_at)
-
+    otp = OTPToken.objects.filter(user=user).first()
+    if otp:
+        otp.delete()
+        otp = OTPToken.objects.create(user=user,
+                                      otp_code=otp_code, expires_at=expires_at)
+    else:
+        otp = OTPToken.objects.create(user=user,
+                                      otp_code=otp_code, expires_at=expires_at)
     # Send OTP via email (or other preferred method)
     send_mail(
         'Your OTP Code',

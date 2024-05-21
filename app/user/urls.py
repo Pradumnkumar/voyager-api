@@ -20,5 +20,6 @@ urlpatterns = [
     path('create/',  views.CreateUserView.as_view(), name='create'),
     path('token/', views.CreateTokenView.as_view(), name='token'),
     path('me/', views.ManageUserView.as_view(), name='me'),
-    path('verify_otp/', views.OTPTokenView.as_view(), name='verify_otp')
+    path('verify_otp/', views.VerifyOTPTokenView.as_view(), name='verify_otp'),
+    path('resend_otp/', views.ResendOTPView.as_view(), name='resend_otp'),
 ]

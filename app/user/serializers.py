@@ -113,3 +113,8 @@ class OTPTokenSerializer(serializers.Serializer):
     """Serializer for OTPToken"""
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
+
+
+class ResendOTPTokenSerializer(serializers.Serializer):
+    """Serializer for OTPToken"""
+    email = serializers.EmailField()

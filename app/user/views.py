@@ -13,6 +13,7 @@ from user.serializers import (
     UserSerializer,
     AuthTokenSerialzer,
     OTPTokenSerializer,
+    ResendOTPTokenSerializer,
 )
 
 
@@ -61,7 +62,7 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
-class OTPTokenView(generics.CreateAPIView):
+class VerifyOTPTokenView(generics.CreateAPIView):
     """Create OTP Associated with USER"""
     serializer_class = OTPTokenSerializer
 
@@ -80,3 +81,22 @@ class OTPTokenView(generics.CreateAPIView):
             return Response({'detail': 'Invalid OTP.'},
                             status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResendOTPView(generics.CreateAPIView):
+    """Manage and update existing OTP"""
+    serializer_class = ResendOTPTokenSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        utils.generate_otp(user)
+        return Response({'message': 'OTP has been resent'},
+                        status=status.HTTP_200_OK)

@@ -94,3 +94,36 @@ class OTPVerificationTests(APITestCase):
         # Check that the OTP is not deleted
         otp_count = OTPToken.objects.filter(user=user).count()
         self.assertEqual(otp_count, 1)
+
+    def test_otp_verification_with_otp_resend(self):
+        """Test that a user can verify OTP and become active"""
+        # Create user and generate OTP
+        data = {
+            'email': 'test@example.com',
+            'password': 'test1234',
+            'name': 'test name',
+            'phone': '1234',
+        }
+        url = reverse('user:create')
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = User.objects.get(email=data['email'])
+        self.assertFalse(user.is_active)
+        otp1 = OTPToken.objects.get(user=user)
+
+        url = reverse('user:resend_otp')
+        response = self.client.post(url, {'email': user.email})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        otp2 = OTPToken.objects.get(user=user)
+        self.assertNotEqual(otp1.otp_code, otp2.otp_code)
+
+        url = reverse('user:verify_otp')
+        data = {
+            'email': user.email,
+            'otp': otp2.otp_code,
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user.refresh_from_db()
+        self.assertTrue(user.is_active)
