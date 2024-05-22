@@ -20,7 +20,8 @@ class OTPVerificationTests(APITestCase):
         data = {
             'name': 'test name',
             'email': 'test@example.com',
-            'password': 'testpassword123'
+            'password': 'testpassword123',
+            'phone': '+910000000000',
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

@@ -54,6 +54,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     # created in UserManager will be used to create objects
     objects = UserManager()
 
+    def __str__(self):
+        return self.name
+
 
 class OTPToken(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,

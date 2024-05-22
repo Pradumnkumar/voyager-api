@@ -59,6 +59,8 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
+            name=validated_data['name'],
+            phone=validated_data['phone'],
             is_active=False  # Deactivate user until OTP is verified
         )
         utils.generate_otp(user)
