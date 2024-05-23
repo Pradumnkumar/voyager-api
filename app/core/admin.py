@@ -50,7 +50,7 @@ class UserAdmin(BaseUserAdmin):
 class SectorAdmin(admin.ModelAdmin):
     """Define admin page for Sector"""
     ordering = ['name']
-    list_display = ['id', 'name', 'created_by']
+    list_display = ['name', 'id', 'created_by']
     fieldsets = [
         (
             None,
@@ -84,7 +84,7 @@ class SectorAdmin(admin.ModelAdmin):
 class SkillAdmin(admin.ModelAdmin):
     """Define admin page for Sector"""
     ordering = ['name']
-    list_display = ['id', 'name', 'created_by']
+    list_display = ['name', 'id', 'created_by']
     fieldsets = [
         (
             None,
