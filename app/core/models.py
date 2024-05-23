@@ -70,3 +70,24 @@ class OTPToken(models.Model):
 
     def is_valid(self):
         return self.expires_at and timezone.now() < self.expires_at
+
+
+class Sector(models.Model):
+    name = models.CharField(max_length=256)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                   on_delete=models.SET_NULL,
+                                   null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Skill(models.Model):
+    name = models.CharField(max_length=256)
+    sectors = models.ManyToManyField(Sector)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                   on_delete=models.SET_NULL,
+                                   null=True)
+
+    def __str__(self):
+        return self.name
