@@ -62,19 +62,19 @@ class SectorAdmin(admin.ModelAdmin):
             None,
             {'fields': (
                 'name',
+                'description',
             )}
         ),
     )
 
     def save_model(self, request, obj, form, change):
-        obj.name = obj.name.lower()
         # Perform case-insensitive check for unique name
-        if models.Sector.objects.filter(
-                    name__iexact=obj.name).exclude(pk=obj.pk).exists():
-            raise ValidationError(
-                _("A sector with the name '%(value)s' already exists."),
-                params={'value': obj.name},
-            )
+        if not change:
+            if models.Sector.objects.filter(name__iexact=obj.name).count() > 0:
+                raise ValidationError(
+                    _("A sector with the name '%(value)s' already exists."),
+                    params={'value': obj.name},
+                )
         if not obj.created_by:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
@@ -103,17 +103,15 @@ class SkillAdmin(admin.ModelAdmin):
     filter_horizontal = ['sectors']
 
     def save_model(self, request, obj, form, change):
-        obj.name = obj.name.lower()
         # Perform case-insensitive check for unique name
-        if models.Skill.objects.filter(
-                    name__iexact=obj.name).exclude(pk=obj.pk).exists():
-            raise ValidationError(
-                _("A sector with the name '%(value)s' already exists."),
-                params={'value': obj.name},
-            )
+        if not change:
+            if models.Skill.objects.filter(name__iexact=obj.name).count() > 0:
+                raise ValidationError(
+                    _("A sector with the name '%(value)s' already exists."),
+                    params={'value': obj.name},
+                )
         if not obj.created_by:
             obj.created_by = request.user
-        obj.full_clean()
         super().save_model(request, obj, form, change)
 
 
