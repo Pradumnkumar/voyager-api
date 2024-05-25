@@ -77,6 +77,7 @@ class Sector(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                    on_delete=models.SET_NULL,
                                    null=True)
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name

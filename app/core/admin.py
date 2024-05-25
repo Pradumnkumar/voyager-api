@@ -37,7 +37,6 @@ class UserAdmin(BaseUserAdmin):
                 'email',
                 'password1',
                 'password2',
-                'name',
                 'phone',
                 'is_active',
                 'is_staff',
@@ -54,7 +53,7 @@ class SectorAdmin(admin.ModelAdmin):
     fieldsets = [
         (
             None,
-            {'fields': ['id', 'name', 'created_by']},
+            {'fields': ['id', 'name', 'description', 'created_by']},
         ),
     ]
     readonly_fields = ['id', 'created_by']
