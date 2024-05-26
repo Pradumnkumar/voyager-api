@@ -14,6 +14,8 @@ from user.serializers import (
     AuthTokenSerialzer,
     OTPTokenSerializer,
     ResendOTPTokenSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
 )
 
 
@@ -100,3 +102,33 @@ class ResendOTPView(generics.CreateAPIView):
         utils.generate_otp(user)
         return Response({'message': 'OTP has been resent'},
                         status=status.HTTP_200_OK)
+
+
+class PasswordResetRequestView(generics.CreateAPIView):
+    serializer_class = PasswordResetRequestSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                utils.send_reset_password_url(email, request)
+                return Response(
+                    {"message": "Password reset link has been sent."},
+                    status=status.HTTP_200_OK
+                    )
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "No user is registered with this email."},
+                    status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetConfirmView(generics.CreateAPIView):
+    serializer_class = PasswordResetConfirmSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            return utils.reset_password(serializer)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

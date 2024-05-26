@@ -120,3 +120,15 @@ class OTPTokenSerializer(serializers.Serializer):
 class ResendOTPTokenSerializer(serializers.Serializer):
     """Serializer for OTPToken"""
     email = serializers.EmailField()
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Serializer for User"""
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Serializer for User"""
+    new_password = serializers.CharField(write_only=True, min_length=8)
+    uid = serializers.CharField()
+    token = serializers.CharField()
