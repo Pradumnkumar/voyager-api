@@ -1,0 +1,9 @@
+FROM node:18-alpine
+
+WORKDIR /frontend_React
+
+EXPOSE 3000
+
+COPY ./frontend_React /frontend_React
+
+ARG DEV=false

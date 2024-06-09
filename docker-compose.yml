@@ -1,9 +1,25 @@
 version: '3.9'
 
 services:
-  app:
+  frontend:
     build:
       context: .
+      dockerfile: Dockerfile.react
+      args:
+        - DEV=true
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend_React:/frontend_React
+    command: >
+      sh -c "npm  install && npm start"
+    depends_on:
+      - db
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
       args:
         - DEV=true
     ports:
@@ -12,6 +28,7 @@ services:
       - ./app:/app
     command: >
       sh -c "python manage.py wait_for_db &&
+             python manage.py makemigrations &&
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     environment:

@@ -103,7 +103,8 @@ class QuestionAttemptAdmin(admin.ModelAdmin):
 class ResultAdmin(admin.ModelAdmin):
     list_display = ['assessment_run', 'id', 'user']
     search_fields = ['assessment_run', 'id', 'user']
-    readonly_fields = ('id', 'assessment_run', 'skill_score', 'user')
+    readonly_fields = ('id', 'assessment_run', 'sector_score',
+                       'skill_score', 'user')
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False

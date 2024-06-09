@@ -3,10 +3,14 @@ import django
 from django.contrib.auth import get_user_model
 
 # Ensure the settings module is set
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project_name.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
 
-# Setup Django
+# Setup Django so that apps are ready
 django.setup()
+
+
+from core.models import Sector, Skill  # noqa: E402
+from sector_assessment.models import Choice, Question, Assessment  # noqa: E402
 
 user = get_user_model()
 
@@ -59,10 +63,52 @@ def create_user():
 
 
 def create_sector():
-    pass
+    Sector.objects.create(id=1, name='Sample Sector 1')
+    Sector.objects.create(id=2, name='Sample Sector 2')
+    Sector.objects.create(id=3, name='Sample Sector 3')
+
+
+def create_skill():
+    sectors = Sector.objects.all()
+    skill1 = Skill.objects.create(id=1, name='Sample Skill 1')
+    skill2 = Skill.objects.create(id=2, name='Sample Skill 2')
+    skill3 = Skill.objects.create(id=3, name='Sample Skill 3')
+    skill1.sectors.set([sectors[1], sectors[2]])
+    skill2.sectors.set([sectors[0]])
+    skill3.sectors.set([sectors[2], sectors[0]])
+
+
+def create_question():
+    Question.objects.create(id=1, title='Sample Question 1')
+    Question.objects.create(id=2, title='Sample Question 2')
+
+
+def create_choice():
+    skills = Skill.objects.all()
+    questions = Question.objects.all()
+    for i in range(8):
+        choice = Choice.objects.create(
+            id=i+1,
+            choice_text="This is choice {}".format(i+1),
+            question=questions[i//4])
+        choice.skills.set(
+            [skills[i % skills.count()], skills[(i+1) % skills.count()]])
+
+
+def create_assessment():
+    questions = Question.objects.all()
+    users = user.objects.all()
+    assessment = Assessment.objects.create(id=1, title='Sample Assessment 1')
+    assessment.questions.set(questions)
+    assessment.allowed_users.set(users)
 
 
 if __name__ == "__main__":
     create_super_user()
     create_staff()
     create_user()
+    create_sector()
+    create_skill()
+    create_question()
+    create_choice()
+    create_assessment()
