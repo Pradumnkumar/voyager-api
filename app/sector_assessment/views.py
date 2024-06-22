@@ -47,20 +47,19 @@ class AssessmentView(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
-    def retrieve(self, request, pk=None):
+    def list(self, request):
         user = request.user
 
         # Filter the assessments based on allowed_users and start_time
         try:
-            assessment = models.Assessment.objects.get(
-                id=pk,
+            assessment = models.Assessment.objects.filter(
                 allowed_users=user,
                 # start_time__lte=current_time
             )
         except models.Assessment.DoesNotExist:
             raise NotFound('Assessment not found or access not allowed.')
 
-        serializer = self.get_serializer(assessment)
+        serializer = self.get_serializer(assessment, many=True)
         return Response(serializer.data)
 
 
@@ -71,6 +70,14 @@ class AssessmentRunView(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         return serializer.save()
+
+    def list(self, request):
+        user = request.user
+        assessments = models.AssessmentRun.objects.filter(
+            user=user
+        )
+        serializer = self.get_serializer(assessments, many=True)
+        return Response(serializer.data)
 
     def create(self, request):
         user = request.user

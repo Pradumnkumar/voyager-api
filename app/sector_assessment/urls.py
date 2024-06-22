@@ -27,9 +27,13 @@ urlpatterns = [
          views.QuestionView.as_view({'get': 'retrieve'}),
          name='question'),
 
-    path('sector-assessment/get',
-         views.AssessmentView.as_view({'get': 'retrieve'}),
+    path('assessment/',
+         views.AssessmentView.as_view({'get': 'list'}),
          name='assessment'),
+
+    path('assessment-run/',
+         views.AssessmentRunView.as_view({'get': 'list'}),
+         name='assessment-run'),
 
     path('assessment-run/post',
          views.AssessmentRunView.as_view({'post': 'create'}),
