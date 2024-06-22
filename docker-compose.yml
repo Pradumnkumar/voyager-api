@@ -12,7 +12,7 @@ services:
     volumes:
       - ./frontend_React:/frontend_React
     command: >
-      sh -c "npm  install && npm start"
+      sh -c "npm install" # && npm start"
     depends_on:
       - db
 
