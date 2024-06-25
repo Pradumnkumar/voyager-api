@@ -84,7 +84,9 @@ class AssessmentRunView(viewsets.ModelViewSet):
         assessment_id = request.data.get('assessment')
         if not assessment_id:
             raise ParseError("Could not find Assessment ID")
-
+        
+        if request.data.get('user') != request.user.email:
+            raise ValidationError("User requester and attemptor are not same!")
         try:
             assessment = models.Assessment.objects.get(id=assessment_id)
         except models.Assessment.DoesNotExist:
@@ -97,6 +99,7 @@ class AssessmentRunView(viewsets.ModelViewSet):
         question_attempts = []
         try:
             for question_attempt in question_attempts_data:
+                question_attempt['user'] = request.user.id
                 question_serializer = QuestionAttemptCreateSerializer(
                     data=question_attempt
                     )
