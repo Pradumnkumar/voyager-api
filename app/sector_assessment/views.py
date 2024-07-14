@@ -51,6 +51,8 @@ class AssessmentView(viewsets.ReadOnlyModelViewSet):
         user = request.user
 
         # Filter the assessments based on allowed_users and start_time
+        if not user.is_subscriber:
+            raise ValidationError('User is not eligible to take the test')
         try:
             assessment = models.Assessment.objects.filter(
                 allowed_users=user,
