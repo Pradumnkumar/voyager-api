@@ -86,7 +86,7 @@ class AssessmentRunView(viewsets.ModelViewSet):
         assessment_id = request.data.get('assessment')
         if not assessment_id:
             raise ParseError("Could not find Assessment ID")
-        
+
         if request.data.get('user') != request.user.email:
             raise ValidationError("User requester and attemptor are not same!")
         try:

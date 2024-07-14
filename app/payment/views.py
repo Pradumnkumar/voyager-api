@@ -1,6 +1,7 @@
 # views.py
 import razorpay
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,13 +11,19 @@ from rest_framework.exceptions import NotFound, ValidationError
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Payment, Coupon
-from .serializers import CreateOrderSerializer, PaymentSerializer, PaymentSerializerForOrder
+from .serializers import (CreateOrderSerializer,
+                          PaymentSerializer,
+                          PaymentSerializerForOrder)
 
-client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+client = razorpay.Client(auth=(
+    settings.RAZORPAY_KEY_ID,
+    settings.RAZORPAY_KEY_SECRET)
+    )
 order_type = {
     'seminar': 99,
-    'sector_assessment': 499 
+    'sector_assessment': 499
 }
+
 
 class CreateOrderView(APIView):
     permission_classes = [IsAuthenticated]
@@ -40,13 +47,25 @@ class CreateOrderView(APIView):
             try:
                 coupon = Coupon.objects.get(code=coupon_code)
                 discount = coupon.discount
-            except:
+            except ObjectDoesNotExist:
                 discount = 0
 
-        price = (1 - (discount/100)) * sum([order_type[product] for product in products])
-        order = CreateOrderSerializer(data={'amount': price, 'currency': 'INR', 'orders': products})
+        price = sum([order_type[product] for product in products])
+        price_after_discount = (1 - (discount/100)) * price
+        order_data = {
+            'amount': price_after_discount,
+            'currency': 'INR',
+            'orders': products
+            }
+        order = CreateOrderSerializer(data=order_data)
         order.is_valid(raise_exception=True)
-        payment = client.order.create({'amount': int(price * 100), 'currency': 'INR', 'payment_capture': '1'})
+
+        razorpay_data = {
+            'amount': int(price_after_discount * 100),
+            'currency': 'INR',
+            'payment_capture': '1'
+            }
+        payment = client.order.create(razorpay_data)
         payment_data = {
             'user': request.user.id,
             'razorpay_order_id': payment['id'],
@@ -58,6 +77,7 @@ class CreateOrderView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class VerifyPaymentView(APIView):
     permission_classes = [IsAuthenticated]
@@ -72,7 +92,9 @@ class VerifyPaymentView(APIView):
         validated_data = serializer.validated_data
 
         try:
-            payment = Payment.objects.get(razorpay_order_id=validated_data['razorpay_order_id'])
+            payment = Payment.objects.get(
+                razorpay_order_id=validated_data['razorpay_order_id']
+                )
         except Payment.DoesNotExist:
             raise NotFound('Payment not found.')
 
@@ -104,4 +126,5 @@ class VerifyPaymentView(APIView):
 
         if products_updated:
             user.save()
-        return Response({'status': 'Payment verified successfully'}, status=status.HTTP_200_OK)
+        return Response({'status': 'Payment verified successfully'},
+                        status=status.HTTP_200_OK)
