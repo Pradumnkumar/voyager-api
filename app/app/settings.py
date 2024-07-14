@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'core',
+    'payment',
     'rest_framework',
     'rest_framework.authtoken',
     'drf_spectacular',
@@ -151,3 +152,6 @@ DEFAULT_FROM_EMAIL = 'your_email@example.com'
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = False
 # DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+RAZORPAY_KEY_ID = 'rzp_test_Gdv3pkoaEb6qHc'
+RAZORPAY_KEY_SECRET = 'oqjKAIXzFRh4F3BxPwawAOZr'
